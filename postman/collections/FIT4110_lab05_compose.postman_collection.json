@@ -1,0 +1,120 @@
+﻿{
+  "info": {
+    "name": "FIT4110 Lab05 Compose Health Checks",
+    "_postman_id": "fit4110-lab05-compose-health",
+    "description": "Health checks for API, AI service and analytics event ingestion in Docker Compose",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "aiServiceUrl",
+      "value": "http://localhost:9000"
+    }
+  ],
+  "item": [
+    {
+      "name": "API Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('API health returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('API status is ok', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Service Health",
+      "request": {
+        "method": "GET",
+        "url": "{{aiServiceUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('AI service health returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('AI service status is ok', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics Event Ingestion",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 202', function () {",
+              "  pm.response.to.have.status(202);",
+              "});",
+              "",
+              "pm.test('Event accepted', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.status).to.eql('accepted');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventId\": \"EVT-LAB05-{{$timestamp}}\",\n  \"eventType\": \"vision.analysis.completed\",\n  \"sourceService\": \"ai-service\",\n  \"occurredAt\": \"2026-06-16T21:30:00+07:00\",\n  \"payload\": {\n    \"cameraId\": \"CAM-A01\",\n    \"objects\": [\"person\", \"bicycle\"],\n    \"confidence\": [0.98, 0.85]\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analytics/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "analytics",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
