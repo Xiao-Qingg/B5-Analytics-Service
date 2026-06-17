@@ -10,7 +10,7 @@ services:
     container_name: fit4110-api-lab05
 
     env_file:
-      - .env
+      - .env.example
 
     depends_on:
       db:
